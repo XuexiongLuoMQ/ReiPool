@@ -16,6 +16,7 @@ This code run with Python 3.
 * torch-sparse == 0.6.12
 * magic-graph
 
+
     git clone https://github.com/phanein/magic-graph.git
     cd magic-graph
     python setup.py install
