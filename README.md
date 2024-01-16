@@ -2,11 +2,11 @@
 
 ReiPool: Reinforced Pooling Graph Neural Networks for Graph-Level Representation Learning
 
-##Data preparation
+## Data preparation
 
 The datasets used in this paper are from [TUDatasets](https://chrsmrrs.github.io/datasets/docs/datasets/), which can be accessed directly through pytorch geometric.
 
-##Requirements
+## Requirements
 
 This code run with Python 3.
     *torch == 1.10.2+cu113
@@ -19,6 +19,6 @@ This code run with Python 3.
     cd magic-graph
     python setup.py install
 
-##Train
+## Train
 
 python main.py --dataset PROTEINS
