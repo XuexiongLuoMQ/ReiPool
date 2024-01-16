@@ -15,11 +15,10 @@ This code run with Python 3.
 * torch-scatter == 2.0.9
 * torch-sparse == 0.6.12
 * magic-graph
-    
+
     git clone https://github.com/phanein/magic-graph.git
     cd magic-graph
     python setup.py install
 
 ## Train
-
-python main.py --dataset PROTEINS
+    python main.py --dataset PROTEINS
