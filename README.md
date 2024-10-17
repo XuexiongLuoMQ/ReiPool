@@ -1,6 +1,6 @@
 # ReiPool
 
-The code of paper "ReiPool: Reinforced Pooling Graph Neural Networks for Graph-level Representation Learning".
+The code of paper "ReiPool: Reinforced Pooling Graph Neural Networks for Graph-level Representation Learning". Accepted by IEEE TKDE 2024
 
 ## Data preparation
 
