@@ -226,18 +226,60 @@ def read_coarsening_info(coarsening_file_dir):
         rename = {}
     return recursive_merged_nodes
 
+def check_graph_pyg(dataset):
+    path = 'data/'+dataset
+    print('load cache')
+    cache = pkl.load(open(path+'/cache','rb'))
+    merged = cache['merged']
+    offsets = cache['offsets']
+    levels = [len(merged[i])+1 for i in range(len(merged))]
+    graphs = load_dataset(path,dataset)
+    connected_indices = np.loadtxt(path+'/connected.txt',dtype=int)
+    node_nums = []
+    for i in connected_indices:
+        node_nums.append(graphs[i].x.shape[0])
+    graphs = Data._deserialize_grpahs(path+'/graphs.mtx', offsets, node_nums, levels)
+    print(len(graphs))
+    actions = pkl.load(open(path+'/actions.pkl','rb'))
+    assert len(actions) == len(graphs)
+    idx_act = []
+    for idx,act in actions.items():
+        idx_act.append((idx,act))
+    # sorted(idx_act,key=lambda x:x[0])
+    acts = np.array([i[1] for i in idx_act])
+    uni_acts = np.unique(acts)
+    # rets = {}
+    for act in uni_acts:
+        if act == 0:
+            continue
+        # rets[act] = []
+        inds = np.where(acts==act)
+        ind = np.random.choice(inds,1)[0]
+        ind = idx_act[ind][0]
+        coars_graph = graphs[ind]
+        edges_ls = []
+        for graph in coars_graph:
+            edges,_ = graph.get_edges()
+            edges_ls.append(edges)
+        draw(edges_ls,ind,merged[ind])
+
 
 if __name__ == '__main__':
     import sys
-    graph = load_graph(sys.argv[1],True)
-    prefix = sys.argv[1].split('_')[0]
-    graphs, merged_nodes = coarsening(graph,'bin/sfdp_linux')
-    dir = f'{prefix}_coarsed_graphs'
-    if not os.path.exists(dir):
-        os.mkdir(dir)
-    for i,graph in enumerate(graphs):
-        with open(f'{dir}/graph{i}','w') as f:
-            edges, weights = graph.get_edges()
-            print(i, len(edges))
-            for i in range(len(edges)):
-                f.write(str(edges[i][0])+' '+str(edges[i][1])+' '+str(weights[i])+'\n') 
+    from data import Data,load_dataset
+    import pickle as pkl
+    from check import draw
+
+    # graph = load_graph(sys.argv[1],True)
+    # prefix = sys.argv[1].split('_')[0]
+    # graphs, merged_nodes = coarsening(graph,'bin/sfdp_linux')
+    # dir = f'{prefix}_coarsed_graphs'
+    # if not os.path.exists(dir):
+    #     os.mkdir(dir)
+    # for i,graph in enumerate(graphs):
+    #     with open(f'{dir}/graph{i}','w') as f:
+    #         edges, weights = graph.get_edges()
+    #         print(i, len(edges))
+    #         for i in range(len(edges)):
+    #             f.write(str(edges[i][0])+' '+str(edges[i][1])+' '+str(weights[i])+'\n') 
+    check_graph_pyg(sys.argv[1])
