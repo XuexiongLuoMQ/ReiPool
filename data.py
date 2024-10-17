@@ -48,6 +48,37 @@ class Data(object):
         self.dataset = dataset
         self.sfdp_path = sfdp_path
 
+    @staticmethod
+    def _deserialize_grpahs(path,offsets,node_nums,levels):
+        coo = mmread(path)
+        s = 0
+        ofst = 0
+        graphs = []
+        ofstl = 0
+        for i,l in enumerate(levels):
+            m = node_nums[i]
+            subgraphs = []
+            ns = [0]+offsets[ofstl:ofstl+l]
+            ns = np.cumsum(ns)
+            for j in range(l):
+                graph = magicgraph.DiGraph()
+                # import pdb; pdb.set_trace()
+                rows = coo.row[s+ns[j]:s+ns[j+1]]
+                cols = coo.col[s+ns[j]:s+ns[j+1]]
+                # ofst = N+m*j
+                for x,y in zip(rows,cols):
+                    x -= ofst
+                    y -= ofst
+                    graph[x].append(y)
+                    graph[y].append(x)
+                ofst += m
+                subgraphs.append(DoubleWeightedDiGraph(graph))
+            graphs.append(subgraphs)
+            s += ns[-1]
+            # N += m*l
+            ofstl += l
+        return graphs
+
     def load(self):
         def _make_adj(g, n_nodes):
             adj = np.zeros((n_nodes,n_nodes))
@@ -125,35 +156,35 @@ class Data(object):
             print('graph saved, shape', (ofst,ofst))
             return offsets
 
-        def _deserialize_grpahs(path,offsets,node_nums,levels):
-            coo = mmread(path)
-            s = 0
-            ofst = 0
-            graphs = []
-            ofstl = 0
-            for i,l in enumerate(levels):
-                m = node_nums[i]
-                subgraphs = []
-                ns = [0]+offsets[ofstl:ofstl+l]
-                ns = np.cumsum(ns)
-                for j in range(l):
-                    graph = magicgraph.DiGraph()
-                    # import pdb; pdb.set_trace()
-                    rows = coo.row[s+ns[j]:s+ns[j+1]]
-                    cols = coo.col[s+ns[j]:s+ns[j+1]]
-                    # ofst = N+m*j
-                    for x,y in zip(rows,cols):
-                        x -= ofst
-                        y -= ofst
-                        graph[x].append(y)
-                        graph[y].append(x)
-                    ofst += m
-                    subgraphs.append(DoubleWeightedDiGraph(graph))
-                graphs.append(subgraphs)
-                s += ns[-1]
-                # N += m*l
-                ofstl += l
-            return graphs
+        # def _deserialize_grpahs(path,offsets,node_nums,levels):
+        #     coo = mmread(path)
+        #     s = 0
+        #     ofst = 0
+        #     graphs = []
+        #     ofstl = 0
+        #     for i,l in enumerate(levels):
+        #         m = node_nums[i]
+        #         subgraphs = []
+        #         ns = [0]+offsets[ofstl:ofstl+l]
+        #         ns = np.cumsum(ns)
+        #         for j in range(l):
+        #             graph = magicgraph.DiGraph()
+        #             # import pdb; pdb.set_trace()
+        #             rows = coo.row[s+ns[j]:s+ns[j+1]]
+        #             cols = coo.col[s+ns[j]:s+ns[j+1]]
+        #             # ofst = N+m*j
+        #             for x,y in zip(rows,cols):
+        #                 x -= ofst
+        #                 y -= ofst
+        #                 graph[x].append(y)
+        #                 graph[y].append(x)
+        #             ofst += m
+        #             subgraphs.append(DoubleWeightedDiGraph(graph))
+        #         graphs.append(subgraphs)
+        #         s += ns[-1]
+        #         # N += m*l
+        #         ofstl += l
+        #     return graphs
         
         def _process_merged(merged_ls,graph_ls,feature_ls):
             mask_merged = []
@@ -204,7 +235,7 @@ class Data(object):
                     feat_ls.append(graphs[i].x.numpy())
                     label_ls.append(graphs[i].y.numpy())
                     node_nums.append(graphs[i].x.shape[0])
-                coarsened_graph_ls = _deserialize_grpahs(self.path+'/graphs.mtx',offsets,node_nums,levels)
+                coarsened_graph_ls = self._deserialize_grpahs(self.path+'/graphs.mtx',offsets,node_nums,levels)
                 coarsened_graph_adjs = []
                 print('make adj')
                 for i in range(len(coarsened_graph_ls)):
@@ -274,4 +305,8 @@ class Data(object):
         degs = np.array(deg_ls)
         mask_merged,mask_node = _process_merged(merged_bigls,coarsened_graph_ls,feat_ls)
         print(len(coarsened_graph_ls), len(feat_ls), len(label_ls))
-        return coarsened_graph_adjs, feat_ls, label_ls, mask_merged, mask_node, degs
+        return coarsened_graph_adjs, feat_ls, label_ls, mask_merged, mask_node, degs,graphs.num_classes
+
+# print("load graph")
+# graphs = load_dataset(path='./PROTEINS', dataset_name="PROTEINS")
+# import pdb;pdb.set_trace()
