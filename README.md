@@ -31,9 +31,9 @@ This code run with Python 3.
 
 #### If you find that this code is useful for your research, please cite our paper:
         @ARTICLE{10689369,
+        title={ReiPool: Reinforced Pooling Graph Neural Networks for Graph-Level Representation Learning},
         author={Luo, Xuexiong and Zhang, Sheng and Wu, Jia and Chen, Hongyang and Peng, Hao and Zhou, Chuan and Li, Zhao and Xue, Shan and Yang, Jian},
-        journal={IEEE Transactions on Knowledge and Data Engineering}, 
-        title={ReiPool: Reinforced Pooling Graph Neural Networks for Graph-Level Representation Learning}, 
+        journal={IEEE Transactions on Knowledge and Data Engineering},  
         pages={1-14},
         year={2024},
         }
